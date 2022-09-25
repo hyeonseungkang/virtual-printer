@@ -5,7 +5,7 @@ import { TypedEmitter } from 'tiny-typed-emitter';
 interface PrinterEvents {
   serverStart: (err: Error | null) => void;
   bonjourPublish: () => void;
-  data: (data: Buffer) => void;
+  data: (handledJob: HandledJob, data: Buffer) => void;
 }
 
 interface PrinterOption {

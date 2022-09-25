@@ -1,16 +1,11 @@
-import { openServer, ParsedBodyInterface } from '../server/open-server';
+import { openServer } from '../server/open-server';
 import Fastify from 'fastify';
 import { TypedEmitter } from 'tiny-typed-emitter';
 
 interface PrinterEvents {
   serverStart: (err: Error | null) => void;
   bonjourPublish: () => void;
-  operations: (requestBody: ParsedBodyInterface, responseBody: any) => void;
-  printJobOperation: (
-    requestBody: ParsedBodyInterface,
-    responseBody: any,
-  ) => void;
-  raw: (requestBuffer: Buffer) => void;
+  data: (data: Buffer) => void;
 }
 
 interface PrinterOption {

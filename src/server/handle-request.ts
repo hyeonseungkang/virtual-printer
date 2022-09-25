@@ -8,6 +8,7 @@ export function printJob(printer: Printer, parsedBody: ParsedBodyInterface) {
     parsedBody['operation-attributes-tag']['requesting-user-name'],
   );
   printer.handledJobs.push(handledJob);
+  printer.emit('data', Buffer.from(parsedBody.data));
   return {
     'status-code': parsedBody.statusCode,
     'version-number': '2.0',

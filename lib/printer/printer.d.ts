@@ -1,13 +1,10 @@
 /// <reference types="node" />
 /// <reference types="node" />
-import { ParsedBodyInterface } from '../server/open-server';
 import { TypedEmitter } from 'tiny-typed-emitter';
 interface PrinterEvents {
     serverStart: (err: Error | null) => void;
     bonjourPublish: () => void;
-    operations: (requestBody: ParsedBodyInterface, responseBody: any) => void;
-    printJobOperation: (requestBody: ParsedBodyInterface, responseBody: any) => void;
-    raw: (requestBuffer: Buffer) => void;
+    data: (data: Buffer) => void;
 }
 interface PrinterOption {
     name?: string;

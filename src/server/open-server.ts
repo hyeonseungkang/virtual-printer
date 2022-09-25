@@ -28,7 +28,6 @@ export function openServer(printer: Printer) {
       let data = '';
       payload.on('data', (chunk) => (data += chunk));
       payload.on('end', () => {
-        printer.emit('raw', Buffer.from(data));
         done(null, ipp.parse(Buffer.from(data)));
       });
     },
@@ -45,7 +44,6 @@ export function openServer(printer: Printer) {
     reply.header('Content-Type', 'application/ipp');
     if (body.operation === 'Print-Job') {
       const data = printJob(printer, body);
-      printer.emit('printJobOperation', body, data);
       reply.send(data);
     } else {
       let data = {};
@@ -68,7 +66,6 @@ export function openServer(printer: Printer) {
           break;
         }
       }
-      printer.emit('operations', body, data);
       return reply.send(ipp.serialize(data));
     }
   });

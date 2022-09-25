@@ -167,7 +167,6 @@ web_modules/
 
 # Nuxt.js build / generate temp
 .nuxt
-dist
 
 # Gatsby files
 .cache/

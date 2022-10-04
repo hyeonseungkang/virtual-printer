@@ -1,89 +1,92 @@
 import { Printer } from '../printer/printer';
 import * as ipp from 'ipp';
-import { ParsedBuffer, PrinterOpertaion } from 'ipp';
 import {
   getJobs,
   getPrinterAttributes,
   printJob,
   validateJob,
 } from './handle-request';
-import { getResponder } from '@homebridge/ciao';
-
-export type ParsedBodyInterface = ParsedBuffer & {
-  operation: PrinterOpertaion & [];
-  'operation-attributes-tag': {
-    'requested-attributes': string[];
-    'attributes-charset': string;
-    'attributes-natural-language': string;
-    'printer-uri': string;
-    'requesting-user-name': string;
-    'job-name': string;
-  };
-};
+import { getResponder, ServiceEvent } from '@homebridge/ciao';
+import { Constants, ParsedIPP } from './interfaces/parsed-body';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import * as ippEncoder from 'ipp-encoder';
 
 export function openServer(printer: Printer) {
   printer.server.addContentTypeParser(
     'application/ipp',
     (request, payload, done) => {
-      let data = '';
-      payload.on('data', (chunk) => (data += chunk));
+      const data: Buffer[] = [];
+      payload.on('data', (chunk) => {
+        data.push(Buffer.from(chunk));
+      });
       payload.on('end', () => {
-        done(null, ipp.parse(Buffer.from(data)));
+        done(null, data);
       });
     },
   );
 
   printer.server.post('/printer/:id', (request, reply) => {
-    console.log(request.body);
     reply.header('Content-Type', 'application/ipp');
     reply.send(null);
   });
 
   printer.server.post('/', (request, reply) => {
-    const body = request.body as ParsedBodyInterface;
+    const buffers = request.body as Buffer[];
+    const body = ippEncoder.request.decode(buffers[0]) as ParsedIPP;
     reply.header('Content-Type', 'application/ipp');
-    if (body.operation === 'Print-Job') {
-      const data = printJob(printer, body);
+    if (body.operationId === Constants.PRINT_JOB) {
+      const data = printJob(printer, body, buffers);
       reply.send(data);
     } else {
-      let data = {};
-      switch (body.operation) {
-        case 'Get-Jobs':
+      let data: any;
+      switch (body.operationId) {
+        case Constants.GET_JOBS:
           data = getJobs(printer, body);
           break;
-        case 'Get-Printer-Attributes':
+        case Constants.GET_PRINTER_ATTRIBUTES:
           data = getPrinterAttributes(printer, body);
           break;
-        case 'Validate-Job':
+        case Constants.VALIDATE_JOB:
           data = validateJob(printer, body);
           break;
         default: {
           data = {
-            id: body.id,
+            id: body.requestId,
             version: '2.0',
             statusCode: 'server-error-operation-not-supported',
           };
           break;
         }
       }
-      return reply.send(ipp.serialize(data));
+      reply.send(ipp.serialize(data));
     }
   });
 
   printer.server.listen(
-    { port: printer.printerOption.port, host: printer.printerOption.host },
-    (err) => {
-      printer.emit('serverStart', err);
+    {
+      port: Number(printer.printerOption.uri.port),
+      host: printer.printerOption.uri.hostname,
+    },
+    (error) => {
+      printer.emit('server-opened', error);
     },
   );
 
-  const responder = getResponder();
-  const service = responder.createService({
-    name: printer.printerOption.name as string,
-    type: 'ipp',
-    port: printer.printerOption.port,
-  });
-  return service.advertise().then(() => {
-    printer.emit('bonjourPublish');
-  });
+  if (printer.printerOption.bonjour) {
+    const responder = getResponder();
+    const service = responder.createService({
+      name: printer.printerOption.name,
+      type: !printer.printerOption.security ? 'ipp' : 'ipps',
+      port: Number(printer.printerOption.uri.port),
+    });
+    service.on(ServiceEvent.NAME_CHANGED, (name) => {
+      printer.printerOption.name = name;
+      printer.emit('bonjour-name-change', name);
+    });
+    service.on(ServiceEvent.HOSTNAME_CHANGED, (name) =>
+      printer.emit('bonjour-hostname-change', name),
+    );
+    return service.advertise().then(() => printer.emit('bonjour-published'));
+  }
 }

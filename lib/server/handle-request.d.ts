@@ -1,7 +1,8 @@
+/// <reference types="node" />
 import { Printer } from '../printer/printer';
-import { ParsedBodyInterface } from './open-server';
-export declare function printJob(printer: Printer, parsedBody: ParsedBodyInterface): {
-    'status-code': import("ipp").StatusCode;
+import { ParsedIPP } from './interfaces/parsed-body';
+export declare function printJob(printer: Printer, parsedBody: ParsedIPP, raw: Buffer[]): {
+    statusCode: string;
     'version-number': string;
     'request-id': number;
     'operation-attributes-tag': {
@@ -14,9 +15,9 @@ export declare function printJob(printer: Printer, parsedBody: ParsedBodyInterfa
         'job-state': number;
     };
 };
-export declare function getPrinterAttributes(printer: Printer, parsedBody: ParsedBodyInterface): Record<string, any>;
-export declare function validateJob(printer: Printer, parsedBody: ParsedBodyInterface): {
-    'status-code': import("ipp").StatusCode;
+export declare function getPrinterAttributes(printer: Printer, parsedBody: ParsedIPP): Record<string, any>;
+export declare function validateJob(printer: Printer, parsedBody: ParsedIPP): {
+    statusCode: string;
     'version-number': string;
     'request-id': number;
     'operation-attributes-tag': {
@@ -24,14 +25,13 @@ export declare function validateJob(printer: Printer, parsedBody: ParsedBodyInte
         'attributes-natural-language': string;
     };
 };
-export declare function getJobs(printer: Printer, parsedBody: ParsedBodyInterface): {
-    'status-code': import("ipp").StatusCode;
+export declare function getJobs(printer: Printer, parsedBody: ParsedIPP): {
+    statusCode: string;
     'version-number': string;
     'request-id': number;
     'operation-attributes-tag': {
         'attributes-charset': string;
         'attributes-natural-language': string;
-        'status-code': string;
     };
     'job-attributes-tag': {};
 };

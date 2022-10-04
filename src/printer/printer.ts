@@ -1,65 +1,86 @@
 import { openServer } from '../server/open-server';
 import Fastify from 'fastify';
+import { HandledJob } from './vos/handled-job';
 import { TypedEmitter } from 'tiny-typed-emitter';
 
 interface PrinterEvents {
-  serverStart: (err: Error | null) => void;
-  bonjourPublish: () => void;
+  'server-opened': (error?: Error | null) => void;
   data: (handledJob: HandledJob, data: Buffer) => void;
+  'bonjour-published': (error?: Error | null) => void;
+  'bonjour-name-change': (name: string) => void;
+  'bonjour-hostname-change': (hostname: string) => void;
 }
 
-interface PrinterOption {
+interface PrinterOptionsRequest {
+  /**
+   * printer-name (name(127))
+   */
   name?: string;
-  port?: number;
-  host?: string;
-  additional?: {
-    description?: string;
-    location?: string;
-    makeAndModel?: string;
-    moreInfo?: string;
-  };
+  /**
+   * printer-uri-supported (1setOf uri)
+   */
+  uri?: URL;
+  /**
+   * printer-info (text(127))
+   */
+  description?: string;
+  /**
+   * printer-location (text(127))
+   */
+  location?: string;
+  /**
+   * printer-more-info (uri)
+   */
+  moreInfo?: URL;
+  /**
+   * uri-security-supported (1setOf type2 keyword) 'tls', 'none'
+   */
+  security?: boolean;
+  /**
+   * document-format-supported (1setOf mimeMediaType)
+   * 'application/postscript', 'application/pdf', 'application/octet-stream' ...IANA MIME TYPES
+   *
+   */
+  format?: string[];
+  /**
+   * publish to bonjour
+   */
+  bonjour?: boolean;
 }
 
-export class HandledJob {
-  constructor(
-    handledJobs: HandledJob[],
-    jobName: string,
-    jobOriginatingUserName: string,
-  ) {
-    this['job-id'] = handledJobs.length + 1;
-    this['job-name'] = jobName;
-    this['job-originating-user-name'] = jobOriginatingUserName;
-  }
-  public readonly 'job-id': number;
-  public readonly 'job-state' = 9;
-  public readonly 'job-name';
-  public readonly 'job-originating-user-name': string;
-  public readonly createdAt = Date.now();
+interface PrinterOptions {
+  name: string;
+  uri: URL;
+  description: string;
+  location: string;
+  moreInfo: URL;
+  security: boolean;
+  format: string[];
+  bonjour: boolean;
 }
 
 export class Printer extends TypedEmitter<PrinterEvents> {
-  constructor(printerOption?: PrinterOption) {
+  constructor(options?: PrinterOptionsRequest) {
     super();
-    printerOption = {
-      ...printerOption,
-      additional: { ...this.printerOption, ...printerOption?.additional },
-    };
-    this.printerOption = { ...this.printerOption, ...printerOption };
+    this.printerOption = { ...this.printerOption, ...options };
+    if (!this.printerOption.uri.port) this.printerOption.uri.port = '3000';
+    !this.printerOption.security
+      ? (this.printerOption.uri.protocol = 'ipp')
+      : (this.printerOption.uri.protocol = 'ipps');
     openServer(this);
   }
 
-  public readonly printerOption: PrinterOption = {
-    port: 3000,
-    name: 'IPP Printer created by NodeJS',
-    host: '0.0.0.0',
-    additional: {
-      description: 'IPP Printer created by NodeJS',
-      location: 'localhost',
-      makeAndModel: 'Generic PostScript Printer',
-      moreInfo: 'http://localhost:3000',
-    },
+  public readonly printerOption: PrinterOptions = {
+    uri: new URL('ipp://0.0.0.0:3000'),
+    name: 'Printer',
+    description: 'IPP Printer created by NodeJS',
+    location: '0.0.0.0',
+    moreInfo: new URL('ipp://0.0.0.0:3000'),
+    security: false,
+    format: ['application/postscript'],
+    bonjour: true,
   };
   public readonly handledJobs: HandledJob[] = [];
-  public readonly started = Date.now();
+  public readonly startedAt = new Date();
   public readonly server = Fastify();
 }

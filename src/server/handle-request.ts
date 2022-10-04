@@ -1,18 +1,43 @@
-import { HandledJob, Printer } from '../printer/printer';
-import { ParsedBodyInterface } from './open-server';
+import { Printer } from '../printer/printer';
+import { HandledJob } from '../printer/vos/handled-job';
+import {
+  Attribute,
+  Constants,
+  Group,
+  ParsedIPP,
+} from './interfaces/parsed-body';
 
-export function printJob(printer: Printer, parsedBody: ParsedBodyInterface) {
+export function printJob(
+  printer: Printer,
+  parsedBody: ParsedIPP,
+  raw: Buffer[],
+) {
+  let jobName = '';
+  let requestingUserName = '';
+  try {
+    const group = parsedBody.groups.find(
+      (v) => v.tag === Constants.OPERATION_ATTRIBUTES_TAG,
+    ) as Group;
+    jobName = (group.attributes.find((v) => v.name === 'job-name') as Attribute)
+      .value[0];
+    requestingUserName = (
+      group.attributes.find(
+        (v) => v.name === 'requesting-user-name',
+      ) as Attribute
+    ).value[0];
+  } finally {
+  }
   const handledJob = new HandledJob(
     printer.handledJobs,
-    parsedBody['operation-attributes-tag']['job-name'],
-    parsedBody['operation-attributes-tag']['requesting-user-name'],
+    jobName,
+    requestingUserName,
   );
   printer.handledJobs.push(handledJob);
-  printer.emit('data', handledJob, Buffer.from(parsedBody.data));
+  printer.emit('data', handledJob, Buffer.concat(raw.slice(1, raw.length)));
   return {
-    'status-code': parsedBody.statusCode,
-    'version-number': '2.0',
-    'request-id': parsedBody.id,
+    statusCode: 'successful-ok',
+    'version-number': '1.1',
+    'request-id': parsedBody.requestId,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
@@ -25,51 +50,48 @@ export function printJob(printer: Printer, parsedBody: ParsedBodyInterface) {
   };
 }
 
-export function getPrinterAttributes(
-  printer: Printer,
-  parsedBody: ParsedBodyInterface,
-) {
-  const printerAttributesTag: Record<string, any> = {
-    'printer-info': printer.printerOption.additional?.description,
-    'printer-is-accepting-jobs': true,
-    'printer-location': printer.printerOption.additional?.location,
-    'printer-name': printer.printerOption.name,
-    'printer-make-and-model': printer.printerOption.additional?.makeAndModel,
-    'printer-more-info': printer.printerOption.additional?.moreInfo,
-    'operations-supported': [
-      'Print-Job',
-      'Validate-Job',
-      'Get-Printer-Attributes',
-    ],
-    'printer-state': '3',
-    'printer-state-reasons': 'none',
-    'compression-supported': 'none',
-  };
+export function getPrinterAttributes(printer: Printer, parsedBody: ParsedIPP) {
   const data: Record<string, any> = {
-    'version-number': '2.0',
-    'request-id': parsedBody.id,
+    statusCode: 'successful-ok',
+    'version-number': '1.1',
+    'request-id': parsedBody.requestId,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
     },
-    'printer-attributes-tag': {},
-  };
-  parsedBody['operation-attributes-tag']['requested-attributes'].forEach(
-    (attributeName) => {
-      if (printerAttributesTag[attributeName]) {
-        data['printer-attributes-tag'][attributeName] =
-          printerAttributesTag[attributeName];
-      }
+    'printer-attributes-tag': {
+      'printer-info': printer.printerOption.description,
+      'printer-is-accepting-jobs': true,
+      'printer-location': printer.printerOption.location,
+      'printer-name': printer.printerOption.name,
+      'printer-more-info': printer.printerOption.moreInfo.toString(),
+      'printer-uri-supported': printer.printerOption.uri.toString(),
+      'uri-security-supported': !printer.printerOption.security
+        ? 'none'
+        : 'tls',
+      'uri-authentication-supported': 'requesting-user-name',
+      'operations-supported': [
+        'Print-Job',
+        'Validate-Job',
+        'Get-Printer-Attributes',
+      ],
+      'printer-state': Constants.PRINTER_IDLE,
+      'printer-state-reasons': 'none',
+      'compression-supported': 'none',
+      'queued-job-count': 0,
+      'document-format-supported': printer.printerOption.format,
+      'document-format-default': printer.printerOption.format[0],
+      'ipp-versions-supported': '1.1',
     },
-  );
+  };
   return data;
 }
 
-export function validateJob(printer: Printer, parsedBody: ParsedBodyInterface) {
+export function validateJob(printer: Printer, parsedBody: ParsedIPP) {
   return {
-    'status-code': parsedBody.statusCode,
-    'version-number': '2.0',
-    'request-id': parsedBody.id,
+    statusCode: 'successful-ok',
+    'version-number': '1.1',
+    'request-id': parsedBody.requestId,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
@@ -77,15 +99,14 @@ export function validateJob(printer: Printer, parsedBody: ParsedBodyInterface) {
   };
 }
 
-export function getJobs(printer: Printer, parsedBody: ParsedBodyInterface) {
+export function getJobs(printer: Printer, parsedBody: ParsedIPP) {
   return {
-    'status-code': parsedBody.statusCode,
-    'version-number': '2.0',
-    'request-id': parsedBody.id,
+    statusCode: 'successful-ok',
+    'version-number': '1.1',
+    'request-id': parsedBody.requestId,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
-      'status-code': 'successful',
     },
     'job-attributes-tag': {},
   };

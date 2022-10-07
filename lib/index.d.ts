@@ -1,2 +1,3 @@
 import { Printer } from './printer/printer';
-export { Printer };
+import { HandledJob } from './printer/vos/handled-job';
+export { Printer, HandledJob };

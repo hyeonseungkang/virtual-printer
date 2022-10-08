@@ -1,11 +1,11 @@
 import { openServer } from '../server/open-server';
-import Fastify from 'fastify';
+import Fastify, { FastifyRequest } from 'fastify';
 import { HandledJob } from './vos/handled-job';
 import { TypedEmitter } from 'tiny-typed-emitter';
 
 interface PrinterEvents {
   'server-opened': (error?: Error | null) => void;
-  data: (handledJob: HandledJob, data: Buffer) => void;
+  data: (handledJob: HandledJob, data: Buffer, request: FastifyRequest) => void;
   'bonjour-published': (error?: Error | null) => void;
   'bonjour-name-change': (name: string) => void;
   'bonjour-hostname-change': (hostname: string) => void;
@@ -17,9 +17,13 @@ interface PrinterOptionsRequest {
    */
   name?: string;
   /**
+   * for fastify host and port
+   */
+  serverUrl?: URL;
+  /**
    * printer-uri-supported (1setOf uri)
    */
-  uri?: URL;
+  printerUriSupported?: URL;
   /**
    * printer-info (text(127))
    */
@@ -50,7 +54,8 @@ interface PrinterOptionsRequest {
 
 interface PrinterOptions {
   name: string;
-  uri: URL;
+  serverUrl: URL;
+  printerUriSupported: URL;
   description: string;
   location: string;
   moreInfo: URL;
@@ -63,15 +68,19 @@ export class Printer extends TypedEmitter<PrinterEvents> {
   constructor(options?: PrinterOptionsRequest) {
     super();
     this.printerOption = { ...this.printerOption, ...options };
-    if (!this.printerOption.uri.port) this.printerOption.uri.port = '3000';
+    if (!this.printerOption.serverUrl.port)
+      this.printerOption.serverUrl.port = '3000';
+    if (!this.printerOption.printerUriSupported.port)
+      this.printerOption.printerUriSupported.port = '3000';
     !this.printerOption.security
-      ? (this.printerOption.uri.protocol = 'ipp')
-      : (this.printerOption.uri.protocol = 'ipps');
+      ? (this.printerOption.printerUriSupported.protocol = 'ipp')
+      : (this.printerOption.printerUriSupported.protocol = 'ipps');
     openServer(this);
   }
 
   public readonly printerOption: PrinterOptions = {
-    uri: new URL('ipp://0.0.0.0:3000'),
+    serverUrl: new URL('http://0.0.0.0:3000'),
+    printerUriSupported: new URL('ipp://0.0.0.0:3000'),
     name: 'Printer',
     description: 'IPP Printer created by NodeJS',
     location: '0.0.0.0',

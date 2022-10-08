@@ -6,9 +6,14 @@ import {
   Group,
   ParsedIPP,
 } from './interfaces/parsed-body';
+import { FastifyRequest } from 'fastify';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import * as ippEncoder from 'ipp-encoder';
 
 export function printJob(
   printer: Printer,
+  fastifyRequest: FastifyRequest,
   parsedBody: ParsedIPP,
   raw: Buffer[],
 ) {
@@ -33,7 +38,18 @@ export function printJob(
     requestingUserName,
   );
   printer.handledJobs.push(handledJob);
-  printer.emit('data', handledJob, Buffer.concat(raw.slice(1, raw.length)));
+  for (let i = 0; i < raw.length - 1; i++) {
+    new Promise<void>((resolve) => {
+      ippEncoder.request.decode(raw[i]);
+      resolve();
+    }).catch(() => raw.splice(i, i));
+  }
+  printer.emit(
+    'data',
+    handledJob,
+    Buffer.concat(raw.slice(1, raw.length)),
+    fastifyRequest,
+  );
   return {
     statusCode: 'successful-ok',
     'version-number': '1.1',
@@ -65,7 +81,8 @@ export function getPrinterAttributes(printer: Printer, parsedBody: ParsedIPP) {
       'printer-location': printer.printerOption.location,
       'printer-name': printer.printerOption.name,
       'printer-more-info': printer.printerOption.moreInfo.toString(),
-      'printer-uri-supported': printer.printerOption.uri.toString(),
+      'printer-uri-supported':
+        printer.printerOption.printerUriSupported.toString(),
       'uri-security-supported': !printer.printerOption.security
         ? 'none'
         : 'tls',

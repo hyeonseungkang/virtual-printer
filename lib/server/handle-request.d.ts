@@ -1,7 +1,8 @@
 /// <reference types="node" />
 import { Printer } from '../printer/printer';
 import { ParsedIPP } from './interfaces/parsed-body';
-export declare function printJob(printer: Printer, parsedBody: ParsedIPP, raw: Buffer[]): {
+import { FastifyRequest } from 'fastify';
+export declare function printJob(printer: Printer, fastifyRequest: FastifyRequest, parsedBody: ParsedIPP, raw: Buffer[]): {
     statusCode: string;
     'version-number': string;
     'request-id': number;

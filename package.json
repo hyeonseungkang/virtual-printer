@@ -1,8 +1,8 @@
 {
   "name": "virtual-printer",
   "version": "1.0.5",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "description": "A Node.js module that makes Virtual IPP Printer",
   "author": {
@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/khskeb0513/virtual-printer",
   "repository": {
-    "url": "git+https://github.com/khskeb0513/virtual-printer.git",
+    "url": "https://github.com/khskeb0513/virtual-printer.git",
     "type": "git"
   },
   "bugs": {
@@ -28,7 +28,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/bin.ts",
     "build": "tsc --build",
-    "prestart": "npm install && rimraf lib/ && npm run build",
+    "prestart": "yarn install && rimraf lib/ && yarn run build",
     "start": "node lib/bin.js"
   },
   "dependencies": {

@@ -26,17 +26,12 @@ export function openServer(printer: Printer) {
     },
   );
 
-  printer.server.post('/printer/:id', (request, reply) => {
-    reply.header('Content-Type', 'application/ipp');
-    reply.send(null);
-  });
-
-  printer.server.post('/', (request, reply) => {
+  printer.server.post('*', (request, reply) => {
     const buffers = request.body as Buffer[];
     const body = ippEncoder.request.decode(buffers[0]) as ParsedIPP;
     reply.header('Content-Type', 'application/ipp');
     if (body.operationId === Constants.PRINT_JOB) {
-      const data = printJob(printer, body, buffers);
+      const data = printJob(printer, request, body, buffers);
       reply.send(data);
     } else {
       let data: any;
@@ -65,8 +60,8 @@ export function openServer(printer: Printer) {
 
   printer.server.listen(
     {
-      port: Number(printer.printerOption.uri.port),
-      host: printer.printerOption.uri.hostname,
+      port: Number(printer.printerOption.serverUrl.port),
+      host: printer.printerOption.serverUrl.hostname,
     },
     (error) => {
       printer.emit('server-opened', error);
@@ -78,7 +73,7 @@ export function openServer(printer: Printer) {
     const service = responder.createService({
       name: printer.printerOption.name,
       type: !printer.printerOption.security ? 'ipp' : 'ipps',
-      port: Number(printer.printerOption.uri.port),
+      port: Number(printer.printerOption.serverUrl.port),
     });
     service.on(ServiceEvent.NAME_CHANGED, (name) => {
       printer.printerOption.name = name;

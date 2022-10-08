@@ -6,7 +6,7 @@ import { TypedEmitter } from 'tiny-typed-emitter';
 interface PrinterEvents {
   'server-opened': (error?: Error | null) => void;
   data: (handledJob: HandledJob, data: Buffer, request: FastifyRequest) => void;
-  'bonjour-published': (error?: Error | null) => void;
+  'bonjour-published': () => void;
   'bonjour-name-change': (name: string) => void;
   'bonjour-hostname-change': (hostname: string) => void;
 }

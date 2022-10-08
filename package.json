@@ -1,6 +1,6 @@
 {
   "name": "virtual-printer",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/ipp": "^2.0.2",
-    "@types/node": "^18.7.18",
+    "@types/node": "^18.8.2",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",

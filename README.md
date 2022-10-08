@@ -1,11 +1,7 @@
-# virtual-printer
+# 🖨 virtual-printer
 A Node.js module that makes Virtual IPP Printer.
 
-[https://www.npmjs.com/package/virtual-printer](https://www.npmjs.com/package/virtual-printer)
-
-```
-npm install virtual-printer
-```
+[![https://nodei.co/npm/virtual-printer.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/virtual-printer.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/virtual-printer)
 
 ## Usage
 
@@ -33,6 +29,8 @@ printer.on('data', (handledJob: HandledJob, data: Buffer, request: FastifyReques
   writeFileSync(resolve('output/', handledJob.createdAt + '.ps'), data);
 });
 ```
+
+---
 
 ## API
 
@@ -66,6 +64,8 @@ The Printer object can be initialized with an object containing:
   - rfc8011 #5.4.22: `document-format-supported (1setOf mimeMediaType)`
 
 All attributes need to follow rules by [RFC 8011](https://www.rfc-editor.org/rfc/rfc8011.html) and [IANA MIME types](https://www.iana.org/assignments/media-types/media-types.xhtml).
+
+---
 
 #### Event: data
 
@@ -122,6 +122,8 @@ printer.on('bonjour-name-change', (hostname: string) => {
 });
 ```
 
+---
+
 #### handleJobs: HandleJob[]
 
 The jobs that printer received.
@@ -135,6 +137,8 @@ The fastify instance that server listening.
 #### printerOption: PrinterOptions
 
 Printer options when you constructed with default values.
+
+---
 
 ### Class: HandledJob
 
@@ -157,6 +161,8 @@ The username of the job from request. If username cannot parse, it will be `anon
 #### `createdAt: Date`
 
 The creation date of the job.
+
+---
 
 ## License
 

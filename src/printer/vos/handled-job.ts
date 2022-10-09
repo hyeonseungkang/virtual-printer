@@ -1,8 +1,8 @@
 export class HandledJob {
   constructor(
     handledJobs: HandledJob[],
-    jobName: string,
-    jobOriginatingUserName: string,
+    jobName: string | null,
+    jobOriginatingUserName: string | null,
   ) {
     this['job-id'] = handledJobs.length + 1;
     this['job-name'] = jobName || 'job ' + new Date().toISOString();

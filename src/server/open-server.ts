@@ -7,10 +7,7 @@ import {
   validateJob,
 } from './handle-request';
 import { getResponder, ServiceEvent } from '@homebridge/ciao';
-import { Constants, ParsedIPP } from './interfaces/parsed-body';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import * as ippEncoder from 'ipp-encoder';
+import { ParsedBodyInterface } from './interfaces/parsed-body';
 
 export function openServer(printer: Printer) {
   printer.server.addContentTypeParser(
@@ -21,41 +18,48 @@ export function openServer(printer: Printer) {
         data.push(Buffer.from(chunk));
       });
       payload.on('end', () => {
-        done(null, data);
+        done(null, Buffer.concat(data));
       });
     },
   );
 
   printer.server.post('*', (request, reply) => {
-    const buffers = request.body as Buffer[];
-    const body = ippEncoder.request.decode(buffers[0]) as ParsedIPP;
-    reply.header('Content-Type', 'application/ipp');
-    if (body.operationId === Constants.PRINT_JOB) {
-      const data = printJob(printer, request, body, buffers);
-      reply.send(data);
-    } else {
-      let data: any;
-      switch (body.operationId) {
-        case Constants.GET_JOBS:
-          data = getJobs(printer, body);
-          break;
-        case Constants.GET_PRINTER_ATTRIBUTES:
-          data = getPrinterAttributes(printer, body);
-          break;
-        case Constants.VALIDATE_JOB:
-          data = validateJob(printer, body);
-          break;
-        default: {
-          data = {
-            id: body.requestId,
-            version: '2.0',
-            statusCode: 'server-error-operation-not-supported',
-          };
-          break;
-        }
-      }
-      reply.send(ipp.serialize(data));
+    const buffer = request.body as Buffer;
+    let body = {} as ParsedBodyInterface;
+    try {
+      body = ipp.parse(buffer) as ParsedBodyInterface;
+    } catch (e) {
+      console.error(e);
     }
+    reply.header('Content-Type', 'application/ipp');
+    let data: Buffer;
+    switch (body.operation) {
+      case 'Print-Job':
+        data = printJob(printer, request, body);
+        break;
+      case 'Get-Jobs':
+        data = getJobs(printer, body);
+        break;
+      case 'Get-Printer-Attributes':
+        data = getPrinterAttributes(printer, body);
+        break;
+      case 'Validate-Job':
+        data = validateJob(printer, body);
+        break;
+      default: {
+        data = ipp.serialize({
+          id: body.id,
+          version: '1.0',
+          statusCode: 'server-error-operation-not-supported',
+          'operation-attributes-tag': {
+            'attributes-charset': 'utf-8',
+            'attributes-natural-language': 'en-us',
+          },
+        });
+        break;
+      }
+    }
+    reply.send(data);
   });
 
   printer.server.listen(
@@ -72,7 +76,7 @@ export function openServer(printer: Printer) {
     const responder = getResponder();
     const service = responder.createService({
       name: printer.printerOption.name,
-      type: !printer.printerOption.security ? 'ipp' : 'ipps',
+      type: 'ipp',
       port: Number(printer.printerOption.serverUrl.port),
     });
     service.on(ServiceEvent.NAME_CHANGED, (name) => {

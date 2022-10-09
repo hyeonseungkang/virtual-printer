@@ -897,11 +897,6 @@ ipaddr.js@1.9.1:
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
   integrity sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==
 
-ipp-encoder@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/ipp-encoder/-/ipp-encoder-5.0.0.tgz#33c02c16234a2d5432413f9faaf2910f68977fc8"
-  integrity sha512-vlTOZdO/1lgdRqqk5w3xigOYRGe6XjLpvnK9cXuXhmONQDT7EPbKMsSE+Xn41FdA9ikLyR7kB3/ThDXv2eHCnw==
-
 ipp@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/ipp/-/ipp-2.0.1.tgz#9d28d71a3d075a4d029d30baea2a7be980741cb6"
@@ -1502,11 +1497,6 @@ uri-js@^4.2.2:
   integrity sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==
   dependencies:
     punycode "^2.1.0"
-
-uuid@^9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
-  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"

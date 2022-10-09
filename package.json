@@ -35,9 +35,7 @@
     "@homebridge/ciao": "^1.1.5",
     "fastify": "^4.6.0",
     "ipp": "^2.0.1",
-    "ipp-encoder": "^5.0.0",
-    "tiny-typed-emitter": "^2.1.0",
-    "uuid": "^9.0.0"
+    "tiny-typed-emitter": "^2.1.0"
   },
   "devDependencies": {
     "@types/ipp": "^2.0.2",

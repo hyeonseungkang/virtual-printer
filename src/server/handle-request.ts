@@ -1,59 +1,39 @@
 import { Printer } from '../printer/printer';
 import { HandledJob } from '../printer/vos/handled-job';
-import {
-  Attribute,
-  Constants,
-  Group,
-  ParsedIPP,
-} from './interfaces/parsed-body';
+import { ParsedBodyInterface } from './interfaces/parsed-body';
 import { FastifyRequest } from 'fastify';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import * as ippEncoder from 'ipp-encoder';
+import * as ipp from 'ipp';
 
 export function printJob(
   printer: Printer,
   fastifyRequest: FastifyRequest,
-  parsedBody: ParsedIPP,
-  raw: Buffer[],
+  parsedBody: ParsedBodyInterface,
 ) {
-  let jobName = '';
-  let requestingUserName = '';
+  let jobName = null;
+  let requestingUserName = null;
   try {
-    const group = parsedBody.groups.find(
-      (v) => v.tag === Constants.OPERATION_ATTRIBUTES_TAG,
-    ) as Group;
-    jobName = (group.attributes.find((v) => v.name === 'job-name') as Attribute)
-      .value[0];
-    requestingUserName = (
-      group.attributes.find(
-        (v) => v.name === 'requesting-user-name',
-      ) as Attribute
-    ).value[0];
-  } finally {
-  }
+    requestingUserName =
+      parsedBody['operation-attributes-tag']['requesting-user-name'];
+  } catch {}
+  try {
+    jobName = parsedBody['operation-attributes-tag']['job-name'];
+  } catch {}
   const handledJob = new HandledJob(
     printer.handledJobs,
     jobName,
     requestingUserName,
   );
   printer.handledJobs.push(handledJob);
-  for (let i = 0; i < raw.length - 1; i++) {
-    new Promise<void>((resolve) => {
-      ippEncoder.request.decode(raw[i]);
-      resolve();
-    }).catch(() => raw.splice(i, i));
-  }
   printer.emit(
     'data',
     handledJob,
-    Buffer.concat(raw.slice(1, raw.length)),
+    Buffer.from(parsedBody.data),
     fastifyRequest,
   );
-  return {
+  const data = {
     statusCode: 'successful-ok',
-    'version-number': '1.1',
-    'request-id': parsedBody.requestId,
+    version: '1.0',
+    id: parsedBody.id,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
@@ -64,67 +44,80 @@ export function printJob(
       'job-state': 9,
     },
   };
+  return ipp.serialize(data);
 }
 
-export function getPrinterAttributes(printer: Printer, parsedBody: ParsedIPP) {
-  const data: Record<string, any> = {
+export function getPrinterAttributes(
+  printer: Printer,
+  parsedBody: ParsedBodyInterface,
+) {
+  const data = {
     statusCode: 'successful-ok',
-    'version-number': '1.1',
-    'request-id': parsedBody.requestId,
+    version: '1.0',
+    id: parsedBody.id,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
+      'status-message': 'successful-ok',
     },
     'printer-attributes-tag': {
-      'printer-info': printer.printerOption.description,
-      'printer-is-accepting-jobs': true,
-      'printer-location': printer.printerOption.location,
-      'printer-name': printer.printerOption.name,
-      'printer-more-info': printer.printerOption.moreInfo.toString(),
       'printer-uri-supported':
         printer.printerOption.printerUriSupported.toString(),
-      'uri-security-supported': !printer.printerOption.security
-        ? 'none'
-        : 'tls',
-      'uri-authentication-supported': 'requesting-user-name',
+      'uri-security-supported': 'requesting-user-name',
+      'uri-authentication-supported': 'none',
+      'printer-name': printer.printerOption.name,
+      'printer-state': 'idle',
+      'printer-state-reasons': 'none',
+      'ipp-versions-supported': '1.0',
       'operations-supported': [
         'Print-Job',
         'Validate-Job',
+        'Get-Jobs',
         'Get-Printer-Attributes',
       ],
-      'printer-state': Constants.PRINTER_IDLE,
-      'printer-state-reasons': 'none',
-      'compression-supported': 'none',
-      'queued-job-count': 0,
-      'document-format-supported': printer.printerOption.format,
+      'charset-configured': 'utf-8',
+      'charset-supported': 'utf-8',
+      'natural-language-configured': 'en-us',
+      'generated-natural-language-supported': 'en-us',
       'document-format-default': printer.printerOption.format[0],
-      'ipp-versions-supported': '1.1',
+      'document-format-supported': printer.printerOption.format,
+      'printer-is-accepting-jobs': true,
+      'queued-job-count': 0,
+      'pdl-override-supported': 'not-attempted',
+      'printer-up-time': (
+        (Date.now() - printer.startedAt.valueOf()) /
+        1000
+      ).toFixed(),
+      'printer-current-time': printer.startedAt,
+      'compression-supported': ['deflate', 'gzip'],
     },
   };
-  return data;
+  return ipp.serialize(data);
 }
 
-export function validateJob(printer: Printer, parsedBody: ParsedIPP) {
-  return {
+export function validateJob(printer: Printer, parsedBody: ParsedBodyInterface) {
+  const data = {
     statusCode: 'successful-ok',
-    'version-number': '1.1',
-    'request-id': parsedBody.requestId,
+    version: '1.0',
+    id: parsedBody.id,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
     },
   };
+  return ipp.serialize(data);
 }
 
-export function getJobs(printer: Printer, parsedBody: ParsedIPP) {
-  return {
+export function getJobs(printer: Printer, parsedBody: ParsedBodyInterface) {
+  const data = {
     statusCode: 'successful-ok',
-    'version-number': '1.1',
-    'request-id': parsedBody.requestId,
+    version: '1.0',
+    id: parsedBody.id,
     'operation-attributes-tag': {
       'attributes-charset': 'utf-8',
       'attributes-natural-language': 'en-us',
     },
     'job-attributes-tag': {},
   };
+  return ipp.serialize(data);
 }

@@ -15,8 +15,7 @@ const printer = new Printer({ //default options
   description: 'IPP Printer created by NodeJS',
   location: '0.0.0.0',
   moreInfo: new URL('ipp://0.0.0.0:3000'),
-  security: false,
-  format: ['application/postscript'],
+  format: ['application/pdf'],
   bonjour: true,
 })
 
@@ -29,8 +28,6 @@ printer.on('data', (handledJob: HandledJob, data: Buffer, request: FastifyReques
   writeFileSync(resolve('output/', handledJob.createdAt + '.ps'), data);
 });
 ```
-
----
 
 ## API
 
@@ -55,8 +52,6 @@ The Printer object can be initialized with an object containing:
   - rfc8011#5.4.5: `printer-location (text(127))`
 - `moreInfo: string`
   - rfc8011#5.4.7: `printer-more-info (uri)`
-- `security: boolean`
-  - rfc8011#5.4.3: `uri-security-supported (1setOf type2 keyword) 'tls', 'none'`
 - `format: string[]`
   - Formats in string array must be taken from IANA MIME types.
   - First string in string array will set to `document-format-default`. 
@@ -64,8 +59,6 @@ The Printer object can be initialized with an object containing:
   - rfc8011 #5.4.22: `document-format-supported (1setOf mimeMediaType)`
 
 All attributes need to follow rules by [RFC 8011](https://www.rfc-editor.org/rfc/rfc8011.html) and [IANA MIME types](https://www.iana.org/assignments/media-types/media-types.xhtml).
-
----
 
 #### Event: data
 
@@ -78,6 +71,7 @@ import { HandledJob, FastifyRequest } from 'virtual-printer';
 
 printer.on('data', (handledJob: HandledJob, data: Buffer, request: FastifyRequest) => {
   console.log(handledJob, request.url);
+  // const rawRequest = request.data;
   writeFileSync(resolve('output/', handledJob.createdAt + '.ps'), data);
 });
 ```
@@ -122,8 +116,6 @@ printer.on('bonjour-name-change', (hostname: string) => {
 });
 ```
 
----
-
 #### handleJobs: HandleJob[]
 
 The jobs that printer received.
@@ -137,8 +129,6 @@ The fastify instance that server listening.
 #### printerOption: PrinterOptions
 
 Printer options when you constructed with default values.
-
----
 
 ### Class: HandledJob
 
@@ -161,8 +151,6 @@ The username of the job from request. If username cannot parse, it will be `anon
 #### `createdAt: Date`
 
 The creation date of the job.
-
----
 
 ## License
 

@@ -37,10 +37,6 @@ interface PrinterOptionsRequest {
    */
   moreInfo?: URL;
   /**
-   * uri-security-supported (1setOf type2 keyword) 'tls', 'none'
-   */
-  security?: boolean;
-  /**
    * document-format-supported (1setOf mimeMediaType)
    * 'application/postscript', 'application/pdf', 'application/octet-stream' ...IANA MIME TYPES
    *
@@ -59,7 +55,6 @@ interface PrinterOptions {
   description: string;
   location: string;
   moreInfo: URL;
-  security: boolean;
   format: string[];
   bonjour: boolean;
 }
@@ -67,14 +62,10 @@ interface PrinterOptions {
 export class Printer extends TypedEmitter<PrinterEvents> {
   constructor(options?: PrinterOptionsRequest) {
     super();
+    this.startedAt.setMilliseconds(0);
     this.printerOption = { ...this.printerOption, ...options };
     if (!this.printerOption.serverUrl.port)
       this.printerOption.serverUrl.port = '3000';
-    if (!this.printerOption.printerUriSupported.port)
-      this.printerOption.printerUriSupported.port = '3000';
-    !this.printerOption.security
-      ? (this.printerOption.printerUriSupported.protocol = 'ipp')
-      : (this.printerOption.printerUriSupported.protocol = 'ipps');
     openServer(this);
   }
 
@@ -84,9 +75,8 @@ export class Printer extends TypedEmitter<PrinterEvents> {
     name: 'Printer',
     description: 'IPP Printer created by NodeJS',
     location: '0.0.0.0',
-    moreInfo: new URL('ipp://0.0.0.0:3000'),
-    security: false,
-    format: ['application/postscript'],
+    moreInfo: new URL('http://0.0.0.0:3000'),
+    format: ['application/pdf'],
     bonjour: true,
   };
   public readonly handledJobs: HandledJob[] = [];

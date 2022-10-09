@@ -11,6 +11,7 @@ const printer = new Printer({
   serverUrl: new URL('http://0.0.0.0:5001'),
   printerUriSupported: new URL('http://0.0.0.0:5001'),
   format: ['application/pdf', 'application/postscript'],
+  bonjour: true,
 });
 
 printer.on('server-opened', (error) => {

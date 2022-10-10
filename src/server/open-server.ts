@@ -28,7 +28,6 @@ export function openServer(printer: Printer) {
     let body = {} as ParsedBodyInterface;
     try {
       body = ipp.parse(buffer) as ParsedBodyInterface;
-      body.data = '';
     } catch (e) {
       console.error(e);
     }
@@ -36,7 +35,7 @@ export function openServer(printer: Printer) {
     let data: Buffer;
     switch (body.operation) {
       case 'Print-Job':
-        data = printJob(printer, request, body, buffer);
+        data = printJob(printer, request, body);
         break;
       case 'Get-Jobs':
         data = getJobs(printer, body);

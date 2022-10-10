@@ -8,7 +8,6 @@ export function printJob(
   printer: Printer,
   fastifyRequest: FastifyRequest,
   parsedBody: ParsedBodyInterface,
-  buffer: Buffer,
 ) {
   let jobName = null;
   let requestingUserName = null;
@@ -25,7 +24,8 @@ export function printJob(
     requestingUserName,
   );
   printer.handledJobs.push(handledJob);
-  let offset = 6;
+  const buffer = Buffer.from(parsedBody.data);
+  let offset = 0;
   let tag = buffer.readInt8(offset);
   while (tag !== 0x03) {
     tag = buffer.readInt8(++offset);

@@ -27,10 +27,15 @@ export function printJob(
   const buffer = Buffer.from(parsedBody.data);
   let offset = 0;
   let tag = buffer.readInt8(offset);
-  while (tag !== 0x03) {
+  while (tag !== 0x03 && offset < 128) {
     tag = buffer.readInt8(++offset);
   }
-  printer.emit('data', handledJob, buffer.subarray(offset + 1), fastifyRequest);
+  printer.emit(
+    'data',
+    handledJob,
+    offset < 128 ? buffer.subarray(offset + 1) : buffer,
+    fastifyRequest,
+  );
   const data = {
     statusCode: 'successful-ok',
     version: '1.0',

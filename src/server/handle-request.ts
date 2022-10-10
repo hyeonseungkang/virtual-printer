@@ -8,6 +8,7 @@ export function printJob(
   printer: Printer,
   fastifyRequest: FastifyRequest,
   parsedBody: ParsedBodyInterface,
+  buffer: Buffer,
 ) {
   let jobName = null;
   let requestingUserName = null;
@@ -24,12 +25,12 @@ export function printJob(
     requestingUserName,
   );
   printer.handledJobs.push(handledJob);
-  printer.emit(
-    'data',
-    handledJob,
-    Buffer.from(parsedBody.data),
-    fastifyRequest,
-  );
+  let offset = 6;
+  let tag = buffer.readInt8(offset);
+  while (tag !== 0x03) {
+    tag = buffer.readInt8(++offset);
+  }
+  printer.emit('data', handledJob, buffer.subarray(offset + 1), fastifyRequest);
   const data = {
     statusCode: 'successful-ok',
     version: '1.0',

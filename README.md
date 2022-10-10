@@ -64,7 +64,8 @@ All attributes need to follow rules by [RFC 8011](https://www.rfc-editor.org/rfc
 
 Emitted when server received new print job.<br>
 The `handledJob: HandledJob` is an instance of [`HandleJob`]().<br>
-If coming data broken, you can directly get request body by `request: FastifyRequest`. The `request.body` will `Buffer[]` to receive chunked request.
+`data: Buffer` is data part parsed from request. 
+A `request: FastifyRequest` instance of `request.body` will `Buffer` and including data and request body.
 
 ```typescript
 import { HandledJob, FastifyRequest } from 'virtual-printer';

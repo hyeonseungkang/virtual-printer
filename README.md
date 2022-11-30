@@ -36,8 +36,9 @@ printer.on('data', (handledJob: HandledJob, data: Buffer, request: FastifyReques
 #### `new Printer(PrinterOptions)`
 
 The Printer object can be initialized with an object containing:
-- `serverUrl: URL`
+- `serverUrl: URL|string`
   - For fastify listing host and port.
+  - If `serverUrl` is `string`, listen on socket.
 - `bonjour: boolean`
   - `true` will publish printer server to bonjour network using `@homebridge/ciao`.
 - `name: string` 

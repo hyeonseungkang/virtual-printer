@@ -50,7 +50,7 @@ interface PrinterOptionsRequest {
 
 interface PrinterOptions {
   name: string;
-  serverUrl: URL;
+  serverUrl: URL | string;
   printerUriSupported: URL;
   description: string;
   location: string;
@@ -64,8 +64,11 @@ export class Printer extends TypedEmitter<PrinterEvents> {
     super();
     this.startedAt.setMilliseconds(0);
     this.printerOption = { ...this.printerOption, ...options };
-    if (!this.printerOption.serverUrl.port)
-      this.printerOption.serverUrl.port = '3000';
+    if (this.printerOption.serverUrl instanceof URL) {
+      if (!this.printerOption.serverUrl.port) {
+        this.printerOption.serverUrl.port = '3000';
+      }
+    }
     openServer(this);
   }
 

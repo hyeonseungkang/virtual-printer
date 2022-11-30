@@ -62,22 +62,31 @@ export function openServer(printer: Printer) {
     reply.send(data);
   });
 
-  printer.server.listen(
-    {
-      port: Number(printer.printerOption.serverUrl.port),
-      host: printer.printerOption.serverUrl.hostname,
-    },
-    (error) => {
+  if (printer.printerOption.serverUrl instanceof URL) {
+    printer.server.listen(
+      {
+        port: Number(printer.printerOption.serverUrl.port),
+        host: printer.printerOption.serverUrl.hostname,
+      },
+      (error) => {
+        printer.emit('server-opened', error);
+      },
+    );
+  } else {
+    printer.server.listen(printer.printerOption.serverUrl, (error) => {
       printer.emit('server-opened', error);
-    },
-  );
+    });
+  }
 
-  if (printer.printerOption.bonjour) {
+  if (
+    printer.printerOption.serverUrl instanceof URL ||
+    printer.printerOption.bonjour
+  ) {
     const responder = getResponder();
     const service = responder.createService({
       name: printer.printerOption.name,
       type: 'ipp',
-      port: Number(printer.printerOption.serverUrl.port),
+      port: Number((printer.printerOption.serverUrl as URL).port),
     });
     service.on(ServiceEvent.NAME_CHANGED, (name) => {
       printer.printerOption.name = name;

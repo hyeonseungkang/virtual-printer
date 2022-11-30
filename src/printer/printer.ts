@@ -19,7 +19,7 @@ interface PrinterOptionsRequest {
   /**
    * for fastify host and port
    */
-  serverUrl?: URL;
+  serverUrl?: URL | string;
   /**
    * printer-uri-supported (1setOf uri)
    */

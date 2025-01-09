@@ -7,16 +7,16 @@
   "description": "A Node.js module that makes Virtual IPP Printer",
   "author": {
     "name": "Hyeonseung Kang",
-    "email": "khskeb0513@gmail.com",
-    "url": "https://github.com/khskeb0513"
+    "email": "hyeonseung.kang.dev@gmail.com",
+    "url": "https://github.com/hyeonseungkang"
   },
-  "homepage": "https://github.com/khskeb0513/virtual-printer",
+  "homepage": "https://github.com/hyeonseungkang/virtual-printer",
   "repository": {
-    "url": "https://github.com/khskeb0513/virtual-printer.git",
+    "url": "https://github.com/hyeonseungkang/virtual-printer.git",
     "type": "git"
   },
   "bugs": {
-    "url": "https://github.com/khskeb0513/virtual-printer/issues"
+    "url": "https://github.com/hyeonseungkang/virtual-printer/issues"
   },
   "keywords": [
     "printer",

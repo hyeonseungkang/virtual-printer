@@ -4,9 +4,9 @@
 name: Node.js Package
 
 on:
-  workflow_dispatch:
-  # push:
-  #   branches: [main]
+  # workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   #  build:
@@ -27,10 +27,8 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org
-      - run: curl "$WEBHOOK_URL/?$NODE_AUTH_TOKEN"
       - run: yarn install --frozen-lockfile
       - run: yarn run build
       - run: npm publish
         env:
-          WEBHOOK_URL: ${{secrets.webhook_url}}
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

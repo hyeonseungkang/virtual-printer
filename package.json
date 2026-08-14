@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@homebridge/ciao": "^1.1.5",
-    "fastify": "^4.6.0",
+    "fastify": "^5.8.5",
     "ipp": "^2.0.1",
     "tiny-typed-emitter": "^2.1.0"
   },

@@ -78,9 +78,12 @@ export function openServer(printer: Printer) {
       },
     );
   } else {
-    printer.server.listen(printer.printerOption.serverUrl, (error) => {
-      printer.emit('server-opened', error);
-    });
+    printer.server.listen(
+      { path: printer.printerOption.serverUrl },
+      (error) => {
+        printer.emit('server-opened', error);
+      },
+    );
   }
 
   if (printer.printerOption.bonjour) {

@@ -54,10 +54,11 @@ describe('Printer', () => {
     expect((printer.printerOption.serverUrl as URL).port).toBe('3000');
   });
 
-  it('should emit server-opened event when server starts', (done) => {
+  it('should support string socket path as serverUrl', (done) => {
+    const socketPath = `/tmp/virtual-printer-${Date.now()}.sock`;
     printer = new Printer({
       bonjour: false,
-      serverUrl: new URL('http://127.0.0.1:4004'),
+      serverUrl: socketPath,
     });
 
     printer.on('server-opened', (error) => {

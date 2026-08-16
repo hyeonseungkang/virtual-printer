@@ -3,10 +3,13 @@ yarn.lock
 package-lock.json
 output/
 src/
+test/
+jest.config.js
 .eslintrc.json
 .github
 .prettierrc
 tsconfig.json
+tsconfig*.json
 
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider

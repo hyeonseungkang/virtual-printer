@@ -31,7 +31,7 @@ export function openServer(printer: Printer) {
     } catch (e) {
       console.error(e);
     }
-    reply.header('Content-Type', 'application/ipp');
+    void reply.header('Content-Type', 'application/ipp');
     let data: Buffer;
     switch (body.operation) {
       case 'Print-Job':
@@ -59,7 +59,7 @@ export function openServer(printer: Printer) {
         break;
       }
     }
-    reply.send(data);
+    void reply.send(data);
   });
 
   if (printer.printerOption.serverUrl instanceof URL) {

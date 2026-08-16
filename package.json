@@ -25,11 +25,12 @@
     "http",
     "server"
   ],
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
     "dev": "nodemon --exec ts-node src/bin.ts",
     "build": "tsc --build",
-    "prestart": "yarn install && rimraf lib/ && yarn run build",
-    "start": "node lib/bin.js"
+    "prestart": "pnpm install && pnpm run build",
+    "start": "node dist/bin.js"
   },
   "dependencies": {
     "@homebridge/ciao": "^1.1.5",

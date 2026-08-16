@@ -1,4 +1,6 @@
+pnpm-lock.yaml
 yarn.lock
+package-lock.json
 output/
 src/
 .eslintrc.json
@@ -94,6 +96,7 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)

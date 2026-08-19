@@ -41,7 +41,7 @@ export function printJob(
     },
     'job-attributes-tag': {
       'job-id': handledJob['job-id'],
-      'job-state': 9,
+      'job-state': 'completed',
     },
   };
   return ipp.serialize(data);

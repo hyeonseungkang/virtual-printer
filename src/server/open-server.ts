@@ -8,13 +8,18 @@ import {
 } from './handle-request';
 import { getResponder, ServiceEvent } from '@homebridge/ciao';
 import { ParsedBodyInterface } from './interfaces/parsed-body';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 export function openServer(printer: Printer) {
   printer.server.addContentTypeParser(
     'application/ipp',
-    (request, payload, done) => {
+    (
+      request: FastifyRequest,
+      payload: NodeJS.ReadableStream,
+      done: (err: Error | null, body?: Buffer) => void,
+    ) => {
       const data: Buffer[] = [];
-      payload.on('data', (chunk) => {
+      payload.on('data', (chunk: Buffer) => {
         data.push(Buffer.from(chunk));
       });
       payload.on('end', () => {
@@ -23,7 +28,7 @@ export function openServer(printer: Printer) {
     },
   );
 
-  printer.server.post('*', (request, reply) => {
+  printer.server.post('*', (request: FastifyRequest, reply: FastifyReply) => {
     const buffer = request.body as Buffer;
     let body = {} as ParsedBodyInterface;
     try {
@@ -31,7 +36,7 @@ export function openServer(printer: Printer) {
     } catch (e) {
       console.error(e);
     }
-    reply.header('Content-Type', 'application/ipp');
+    void reply.header('Content-Type', 'application/ipp');
     let data: Buffer;
     switch (body.operation) {
       case 'Print-Job':
@@ -59,7 +64,7 @@ export function openServer(printer: Printer) {
         break;
       }
     }
-    reply.send(data);
+    void reply.send(data);
   });
 
   if (printer.printerOption.serverUrl instanceof URL) {
@@ -73,20 +78,24 @@ export function openServer(printer: Printer) {
       },
     );
   } else {
-    printer.server.listen(printer.printerOption.serverUrl, (error) => {
-      printer.emit('server-opened', error);
-    });
+    printer.server.listen(
+      { path: printer.printerOption.serverUrl },
+      (error) => {
+        printer.emit('server-opened', error);
+      },
+    );
   }
 
-  if (
-    printer.printerOption.serverUrl instanceof URL ||
-    printer.printerOption.bonjour
-  ) {
+  if (printer.printerOption.bonjour) {
     const responder = getResponder();
+    const port =
+      printer.printerOption.serverUrl instanceof URL
+        ? Number(printer.printerOption.serverUrl.port)
+        : 3000;
     const service = responder.createService({
       name: printer.printerOption.name,
       type: 'ipp',
-      port: Number((printer.printerOption.serverUrl as URL).port),
+      port,
     });
     service.on(ServiceEvent.NAME_CHANGED, (name) => {
       printer.printerOption.name = name;

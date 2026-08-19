@@ -1,5 +1,5 @@
 import { openServer } from '../server/open-server';
-import Fastify, { FastifyRequest } from 'fastify';
+import Fastify, { FastifyInstance, FastifyRequest } from 'fastify';
 import { HandledJob } from './vos/handled-job';
 import { TypedEmitter } from 'tiny-typed-emitter';
 
@@ -84,5 +84,5 @@ export class Printer extends TypedEmitter<PrinterEvents> {
   };
   public readonly handledJobs: HandledJob[] = [];
   public readonly startedAt = new Date();
-  public readonly server = Fastify();
+  public readonly server: FastifyInstance = Fastify();
 }
